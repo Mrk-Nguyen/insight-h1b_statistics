@@ -5,5 +5,10 @@ src/main/main.iml
 # Build files
 target
 
+# Test files
+insight_testsuite/temp
+insight_testsuite/results.txt
+
 # Other
+research
 *.sc
