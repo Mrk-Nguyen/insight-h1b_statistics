@@ -1,10 +1,9 @@
 package h1b
 
-
 import scala.io.Source
-import java.io.BufferedReader
-
 import scala.util.matching.Regex
+
+import java.io.BufferedReader
 
 /**
   * Contains the main functions to process the input CSV file and output the Occupation and States metrics
@@ -26,11 +25,8 @@ class H1BStats {
     // Change these assumptions below if the input files ever change their values encodings
     val sep = ";"
     val rep = ","
-    /*
-      Find occurrences of quoted values containing all characters present on a standard keyboard.
-      These may contain the separator character
-    */
-    val pattern = ";\"[\\w\\s,|;\\\\#.!@$%^&*()-_+={}\\[\\]:'?\\/<>]+\";".r.unanchored
+    //Find occurrences of quoted values that may contain the separator character
+    val pattern = ";\"[^\"]*\";".r.unanchored
 
     try {
       val lines: BufferedReader = Source.fromFile(file).bufferedReader()
@@ -121,7 +117,7 @@ class H1BStats {
   /**
     * Qualifies the application of whether the application is a certified H1-B visa
     * @param row Contains all the columns of data for one visa application
-    * @param fieldMappings object returned from the function getFieldMappings to aid in data retrievel from the row object
+    * @param fieldMappings object returned from the function getFieldMappings to aid in data retrievel from the row array
     * @return true if the application is H1-B certified, false otherwise
     */
   private def qualifyApp(row: Array[String], fieldMappings: collection.mutable.Map[String, Int]): Boolean = {

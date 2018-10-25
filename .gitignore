@@ -9,6 +9,9 @@ target
 insight_testsuite/temp
 insight_testsuite/results.txt
 
+# Mac
+.DS_Store
+
 # Other
 research
 *.sc
