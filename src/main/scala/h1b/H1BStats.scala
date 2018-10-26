@@ -126,8 +126,7 @@ class H1BStats {
 
     // Change these assumptions below if the input files ever change their values encodings
     val certifiedValue = "CERTIFIED"
-    val H1BValue = "H-1B"
-    val H1BValueAlt = "R"
+    val H1BValues = Array("H-1B","H-1B1 Chile","H-1B1 Singapore","R","C","S")
 
     val status = row.apply(fieldMappings.getOrElse("status", -1))
     val visaClass = row.apply(fieldMappings.getOrElse("visaclass", -1))
@@ -135,10 +134,10 @@ class H1BStats {
 
     if (status == certifiedValue) {
       if (withdrawnIndex > -1) { //Only include Certified applications that are not withdrawn
-        (visaClass == H1BValue || visaClass == H1BValueAlt) && row.apply(withdrawnIndex) == "N"
+        H1BValues.contains(visaClass) && row.apply(withdrawnIndex) == "N"
       }
       else {
-        visaClass == H1BValue || visaClass == H1BValueAlt
+        H1BValues.contains(visaClass)
       }
     }
     else false
