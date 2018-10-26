@@ -3,7 +3,7 @@ package h1b
 import scala.io.Source
 import scala.util.matching.Regex
 
-import java.io.BufferedReader
+import java.io._
 
 /**
   * Contains the main functions to process the input CSV file and output the Occupation and States metrics
@@ -146,7 +146,7 @@ class H1BStats {
   /**
     * Utility function to replace all occurrences of a character within match sections of a string according to a
     * Regex pattern. This function will be used to pre-process a string row from an incoming CSV file to guarantee that
-    * the string split will produce consistent results.
+    * the String.split function will produce consistent results for incoming row of data.
     *
     * @param s the target string for replacements
     * @param pattern Regex pattern for matching
@@ -170,14 +170,139 @@ class H1BStats {
     }
     build
   }
+
+  /**
+    * Writes the top 10 occurrences by count to a CSV file. CSV file will contain the following three columns of data:
+    *   - TOP_OCCUPATIONS
+    *   - NUMBER_CERTIFIED_APPLICATIONS
+    *   - PERCENTAGE
+    *
+    * Percentage will be calculated based off the total certified applications regardless of occupation
+    * The data will be semicolon separated.
+    *
+    * @param applications data structure returned from the importCSV function
+    * @param fileOut the filename used to write the CSV file.
+    */
+  def writeTopOccupations(applications: Seq[H1BAppCertified], fileOut: String) = {
+
+    //Change these assumptions if requirements change
+    val header = Array("TOP_OCCUPATIONS","NUMBER_CERTIFIED_APPLICATIONS","PERCENTAGE")
+    val topN = 10
+    val sep = ";"
+
+    val aggregated = aggregateCountBy("occupationSOC", applications)
+    writeOutGroupedCounts( aggregated.take(topN), fileOut, header, sep)
+  }
+
+  /**
+    * Computes a count aggregate given the groupByCol.
+    * Percentage will be calculated based off the total number of certified applications
+    *
+    * @param groupByCol the groupByCol must belong to the possible parameters in the case class H1BAppCertified
+    * @param applications data structure returned from the importCSV function
+    * @return sorted sequence of the aggregated
+    */
+  private def aggregateCountBy(groupByCol: String, applications: Seq[H1BAppCertified] ): Seq[GroupedCount] = {
+
+    val total = applications.size.toDouble
+
+    val aggregated =
+      applications.par.
+        groupBy( _.getField(groupByCol).getOrElse("") ).
+        mapValues(_.size).
+        map( tup => GroupedCount(tup._1, tup._2, tup._2/total * 100 ))
+
+    aggregated.toList.
+      sortWith(_.groupByCol < _.groupByCol).
+      sortWith( _.count > _.count)
+  }
+
+  /**
+    * Writes out data to a CSV file format with the given header and delimiter.
+    *
+    * @param aggregated the data returned from the function aggregateCountBy
+    * @param fileOut the path to the file to be written to
+    * @param header the column names to be written on the first line
+    * @param sep the delimiter
+    */
+  private def writeOutGroupedCounts(aggregated: Seq[GroupedCount], fileOut: String, header: Array[String], sep: String) = {
+
+    var file: File = null
+    var bw: BufferedWriter = null
+
+    try {
+
+      file = new File(fileOut)
+      bw = new BufferedWriter(new FileWriter(file))
+
+      bw.write(header.mkString(sep))
+      bw.newLine()
+
+      for(groupedCount <- aggregated.slice(0,aggregated.length - 1)) {
+        bw.write(groupedCount.toCSVRow(sep))
+        bw.newLine()
+      }
+
+      //write last line
+      bw.write( aggregated.last.toCSVRow(sep) )
+
+    }
+    catch {
+      case e: IOException => println(s"IOException error, error writing file: $fileOut")
+    }
+    finally {
+      bw.close()
+    }
+
+  }
+
 }
 
 /**
-  * Class that contains all needed information to calculate Top 10 Occupation Metrics and Top 10 States for certified
+  * Contains all needed information to calculate Top 10 Occupation Metrics and Top 10 States for certified
   * visa applications. This class can be extended to calculate any other additional metrics if needed.
   *
   * @param occupationSOC contains the intended occupation according to Standard Occupational Classification of the
   *                      person applying for the visa
   * @param workSiteState contains the state where the work will take place
   */
-case class H1BAppCertified (occupationSOC: String, workSiteState: String )
+case class H1BAppCertified (occupationSOC: String, workSiteState: String ) {
+
+  /**
+    * Utility function to retrieves parameters by a given String.
+    * This method is needed to abstract away the map-reduce algorithms into the aggregateCountBy function
+    *
+    * @param fieldName
+    * @return
+    */
+  def getField(fieldName: String): Option[String] = {
+    fieldName match {
+      case "occupationSOC" => Some(occupationSOC)
+      case "workSiteState" => Some(workSiteState)
+      case _ => None
+    }
+  }
+}
+
+/**
+  * Contains the calculated values from a groupBy count aggregation. Contains a method to convert the values
+  * into a string delimited by a given separator.
+  *
+  * @param groupByCol contains the key value from a groupBy count aggregation
+  * @param count contains the count of items that belong to groupByCol from a groupBy count aggregation
+  * @param percent contains the count divided by a given total number
+  */
+case class GroupedCount(groupByCol: String, count: Int, percent: Double ) {
+
+  /**
+    * Convert values in GroupedCount to a delimited String. Formats the percent by rounding to the tenth decimal place and adds
+    * a % character at the end.
+    *
+    * @param sep Given delimiter
+    * @return String combination of all values delimited by a given separator
+    */
+  def toCSVRow(sep: String): String = {
+    val percentFormatted = "%.1f%%".format(percent)
+    s"$groupByCol$sep$count$sep$percentFormatted"
+  }
+}

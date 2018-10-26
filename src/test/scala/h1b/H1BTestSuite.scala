@@ -1,5 +1,7 @@
 package h1b
 
+import scala.io.Source
+
 /**
   * Unit tests for various functions for the H1BStats class
   * @author Mark Nguyen
@@ -8,7 +10,8 @@ object H1BTestSuite extends App {
 
     val h1btestsuite  = new H1BTestSuite
 
-    h1btestsuite.testImportCSV()
+    //h1btestsuite.testImportCSV()
+    h1btestsuite.testWriteTopOccupations()
     println("All tests successfully completed.")
 
 }
@@ -27,6 +30,27 @@ class H1BTestSuite {
   val input2015 = "resources/input/h1b_input2015.csv"
   val input2016 = "resources/input/h1b_input2016.csv"
   val input2017 = "resources/input/h1b_input2017.csv"
+
+  val outputOccupations = "resources/output/top_10_occupations.txt"
+  val outputWorkState = "resources/output/top_10_states.txt"
+
+  val outputOccupationsBase = "resources/output/top_10_occupationsBase.txt"
+  val outputStatesBase = "resources/output/top_10_statesBase.txt"
+
+  val outputOccupations2008 = "resources/output/top_10_occupations2008.txt"
+  val outputStatesBase2008 = "resources/output/top_10_states2008.txt"
+
+  val outputOccupations2014 = "resources/output/top_10_occupations2014.txt"
+  val outputStatesBase2014 = "resources/output/top_10_states2014.txt"
+
+  val outputOccupations2015 = "resources/output/top_10_occupations2015.txt"
+  val outputStatesBase2015 = "resources/output/top_10_states2015.txt"
+
+  val outputOccupations2016 = "resources/output/top_10_occupations2016.txt"
+  val outputStatesBase2016 = "resources/output/top_10_states2016.txt"
+
+  val outputOccupations2017 = "resources/output/top_10_occupations2017.txt"
+  val outputStatesBase2017 = "resources/output/top_10_states2017.txt"
 
   val h1bstats = new h1b.H1BStats
 
@@ -110,6 +134,49 @@ class H1BTestSuite {
       s"First application should contain the occupation: ENGINEERING TEACHERS, POSTSECONDARY for: $input2017")
     assert(data.head.workSiteState == "OK",
       s"First application should contain the work site state: OK for: $input2017")
+
+  }
+
+  /**
+    * Tests the outputTopOccurrences function from the class H1BStats
+    */
+  def testWriteTopOccupations(): Unit = {
+
+    var data = h1bstats.importCSV(inputBase)
+    h1bstats.writeTopOccupations(data,outputOccupations)
+    var theTest = Source.fromFile(outputOccupations).getLines().mkString("\n")
+    var compareTo = Source.fromFile(outputOccupationsBase).getLines().mkString("\n")
+    assert(theTest == compareTo, s"Occupations file does not match compared to what's expected for: $inputBase")
+
+    data = h1bstats.importCSV(input2008)
+    h1bstats.writeTopOccupations(data,outputOccupations)
+    theTest = Source.fromFile(outputOccupations).getLines().mkString("\n")
+    compareTo = Source.fromFile(outputOccupations2008).getLines().mkString("\n")
+    assert(theTest == compareTo, s"Occupations file does not match compared to what's expected for: $input2008")
+
+    data = h1bstats.importCSV(input2014)
+    h1bstats.writeTopOccupations(data,outputOccupations)
+    theTest = Source.fromFile(outputOccupations).getLines().mkString("\n")
+    compareTo = Source.fromFile(outputOccupations2014).getLines().mkString("\n")
+    assert(theTest == compareTo, s"Occupations file does not match compared to what's expected for: $input2014")
+
+    data = h1bstats.importCSV(input2015)
+    h1bstats.writeTopOccupations(data,outputOccupations)
+    theTest = Source.fromFile(outputOccupations).getLines().mkString("\n")
+    compareTo = Source.fromFile(outputOccupations2015).getLines().mkString("\n")
+    assert(theTest == compareTo, s"Occupations file does not match compared to what's expected for: $input2015")
+
+    data = h1bstats.importCSV(input2016)
+    h1bstats.writeTopOccupations(data,outputOccupations)
+    theTest = Source.fromFile(outputOccupations).getLines().mkString("\n")
+    compareTo = Source.fromFile(outputOccupations2016).getLines().mkString("\n")
+    assert(theTest == compareTo, s"Occupations file does not match compared to what's expected for: $input2016")
+
+    data = h1bstats.importCSV(input2017)
+    h1bstats.writeTopOccupations(data,outputOccupations)
+    theTest = Source.fromFile(outputOccupations).getLines().mkString("\n")
+    compareTo = Source.fromFile(outputOccupations2017).getLines().mkString("\n")
+    assert(theTest == compareTo, s"Occupations file does not match compared to what's expected for: $input2017")
 
   }
 }
