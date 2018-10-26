@@ -194,6 +194,17 @@ class H1BStats {
     writeOutGroupedCounts( aggregated.take(topN), fileOut, header, sep)
   }
 
+  def writeTopStates(applications: Seq[H1BAppCertified], fileOut: String) = {
+
+    //Change these assumptions if requirements change
+    val header = Array("TOP_STATES","NUMBER_CERTIFIED_APPLICATIONS","PERCENTAGE")
+    val topN = 10
+    val sep = ";"
+
+    val aggregated = aggregateCountBy("workSiteState", applications)
+    writeOutGroupedCounts( aggregated.take(topN), fileOut, header, sep)
+  }
+
   /**
     * Computes a count aggregate given the groupByCol.
     * Percentage will be calculated based off the total number of certified applications
