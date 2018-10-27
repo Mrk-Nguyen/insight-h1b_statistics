@@ -77,12 +77,12 @@ class H1BTestSuite {
 
     data = h1bstats.importCSV(input2008)
 
-    assert(data.length == 30, s"There should be only 30 qualified H-1B visa applications for: $input2008")
+    assert(data.length == 33, s"There should be only 33 qualified H-1B visa applications for: $input2008")
     assert(data.head.occupationSOC == "OCCUPATIONS IN SYSTEMS ANALYSIS AND PROGRAMMING",
       s"First application should contain the occupation: OCCUPATIONS IN SYSTEMS ANALYSIS AND PROGRAMMING for: $input2008")
 
     data = h1bstats.importCSV(input2009)
-    assert(data.length == 37, s"There should be only 37 qualified H-1B visa applications for: $input2009")
+    assert(data.length == 43, s"There should be only 43 qualified H-1B visa applications for: $input2009")
     assert(data.head.occupationSOC == "THERAPISTS",
       s"First application should contain the occupation: THERAPISTS for: $input2009")
 
@@ -94,8 +94,7 @@ class H1BTestSuite {
     }
 
     data = h1bstats.importCSV(input2011)
-
-    assert(data.length == 255, s"There should be only 301 qualified H-1B visa applications for: $input2011")
+    assert(data.length == 265, s"There should be only 265 qualified H-1B visa applications for: $input2011")
     assert(data.head.occupationSOC == "Teachers and Instructors, All Other*",
       s"First application should contain the occupation: Teachers and Instructors, All Other* for: $input2011")
     assert(data.last.occupationSOC == "Computer Programmers",
