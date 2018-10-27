@@ -195,7 +195,7 @@ class H1BStats {
     * @param applications data structure returned from the importCSV function
     * @param fileOut the filename used to write the CSV file.
     */
-  def writeTopOccupations(applications: Seq[H1BAppCertified], fileOut: String) = {
+  def writeTopOccupations(applications: Seq[H1BAppCertified], fileOut: String): Unit = {
 
     //Change these assumptions if requirements change
     val header = Array("TOP_OCCUPATIONS","NUMBER_CERTIFIED_APPLICATIONS","PERCENTAGE")
@@ -206,7 +206,7 @@ class H1BStats {
     writeOutGroupedCounts( aggregated.take(topN), fileOut, header, sep)
   }
 
-  def writeTopStates(applications: Seq[H1BAppCertified], fileOut: String) = {
+  def writeTopStates(applications: Seq[H1BAppCertified], fileOut: String): Unit = {
 
     //Change these assumptions if requirements change
     val header = Array("TOP_STATES","NUMBER_CERTIFIED_APPLICATIONS","PERCENTAGE")
@@ -248,7 +248,7 @@ class H1BStats {
     * @param header the column names to be written on the first line
     * @param sep the delimiter
     */
-  private def writeOutGroupedCounts(aggregated: Seq[GroupedCount], fileOut: String, header: Array[String], sep: String) = {
+  private def writeOutGroupedCounts(aggregated: Seq[GroupedCount], fileOut: String, header: Array[String], sep: String): Unit = {
 
     var file: File = null
     var bw: BufferedWriter = null
