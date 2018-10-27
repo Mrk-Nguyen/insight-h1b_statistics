@@ -17,6 +17,17 @@ class H1BStats {
     * files are retrieved from: https://www.foreignlaborcert.doleta.gov/performancedata.cfm and follow the encoding found in the File Structure documentation on the site
     * data is delimited by ";"
     *
+    * This import process will replace ALL instances of semicolons with commas within quoted values in order to achieve
+    * consistent splits on the delimiter. Therefore, if a value comes in as:
+    *
+    *   "SOFTWARE DEVELOPERS; APPLICATIONS"
+    *
+    * then the value will be transformed into:
+    *
+    *    SOFTWARE DEVELOPERS, APPLICATIONS
+    *
+    * Notice that any literal double quotes will be removed in the process as well.
+    *
     * @param file path to the CSV file. Assumes CSV file is separated by semicolons
     * @return If there exists an IOException or FileNotFoundException, function will return an empty Seq[H1BAppCertified]
     */
@@ -26,37 +37,40 @@ class H1BStats {
     val sep = ";"
     val rep = ","
     //Find occurrences of quoted values that may contain the separator character
-    val pattern = ";\"[^\"]*\";".r.unanchored
+    val pattern = "\"[^\"]*\"".r.unanchored
 
     try {
-      val lines: BufferedReader = Source.fromFile(file).bufferedReader()
+      val lines = Source.fromFile(file).getLines()
 
       //Analyze header and determine proper index for appropriate field references--------------------------------------
-      val header = lines.readLine().split(sep).map(_.trim)
+      val header = lines.next().split(sep).map(_.trim)
       assert(header.length > 1, s"The file is not delimited by: $sep. Please change the delimiter in your CSV files to: $sep.")
       val fieldMappings = getFieldMappings(header)
 
       //Build collection of only certified H1B apps---------------------------------------------------------------------
-      var data: Seq[H1BAppCertified] = Seq.empty[H1BAppCertified]
 
-      //Buffer each readline and only add it to data collection if the application is a certified H1-B application
-      var nextLine = lines.readLine()
-      while (nextLine != null) {
-        //Replace all occurrences of the separator to the replacement character before splitting on the separator
-        val raw: Array[String] = replaceSep(nextLine,pattern,sep,rep).split(sep).map(_.trim)
-        val qualify: Boolean = qualifyApp(raw, fieldMappings)
-
-        if (qualify) {
-
-          val occupation = raw.applyOrElse(fieldMappings.getOrElse("occupation", -1),(num: Int) => "").replace("\"","")
-          val wsstate = raw.applyOrElse(fieldMappings.getOrElse("wsstate", -1),(num: Int) => "")
-
-          data = data :+ H1BAppCertified (occupation, wsstate)
-        }
-
-        nextLine = lines.readLine()
+      //Make wrapper functions for easier comprehension in the map-reduce algorithm
+      def preprocess(line: String): Array[String] = {
+        replaceSep(line,pattern,sep,rep).split(sep).map(_.trim)
       }
-      data
+
+      def filterH1BCertified(row: Array[String]): Boolean = {
+        qualifyApp(row,fieldMappings)
+      }
+
+      def createH1BCertifiedObject(row: Array[String]): H1BAppCertified = {
+        val occupation = row.applyOrElse(fieldMappings.getOrElse("occupation", -1),(num: Int) => "").replace("\"","")
+        val wsstate = row.applyOrElse(fieldMappings.getOrElse("wsstate", -1),(num: Int) => "")
+
+        H1BAppCertified (occupation, wsstate)
+      }
+
+      lines.
+        map(preprocess).
+        filter(filterH1BCertified).
+        map(createH1BCertifiedObject).
+        toSeq
+
     }
     catch {
       case e: java.io.FileNotFoundException => {
@@ -162,9 +176,9 @@ class H1BStats {
     for (m <- matches) {
 
       val range = (m.start, m.end)
-      val first = build.slice(0,range._1 + 1)
-      val middle = build.slice(range._1 + 1, range._2 - 1).replace(target,rep)
-      val last = build.slice(range._2 - 1, s.length)
+      val first = build.slice(0, range._1)
+      val middle = build.slice(range._1, range._2).replace(";", ",")
+      val last = build.slice(range._2, build.length)
 
       build = first + middle + last
     }
