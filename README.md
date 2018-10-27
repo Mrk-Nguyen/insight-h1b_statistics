@@ -83,15 +83,15 @@ showing up inside quoted values such as:
 1842;"SOFTWARE DEVELOPERS; APPLICATIONS";120;2018-01-29;2018-02-02;H-1B
 ```
 
-*Thus, this program will replace all occurrences of the semicolon character with a comma character inside all quoted values.*
+**Thus, this program will replace all occurrences of the semicolon character with a comma character inside all quoted values.**
 
 Data provided by the Office of Foreign Labor Certification contains inconsistent field names across the different data files. This indicates
 that the program must be compatible to ingest data from several different data structure patterns.
 
-*Thus, this program will check for key fields that have already been vetted to contain the important information the program needs to
-find certified visa applications.*
+**Thus, this program will check for key fields that have already been vetted to contain the important information the program needs to
+find certified visa applications.**
 
-Due differing data structure patterns, there will be some years that need two fields to find certified visa applications:
+Due to differing data structure patterns, there will be some years that need two fields to find certified visa applications:
 
 * STATUS or CASE_STATUS or APPROVAL_STATUS
 * WITHDRAWN
@@ -100,8 +100,8 @@ while some years only need one field to find certified visa applications:
 
 * STATUS
 
-*Therefore, this program will make sure to account for key field combinations in order to properly find certified visa
-applications.*
+**Therefore, this program will make sure to account for key field combinations in order to properly find certified visa
+applications.**
 
 ### Data aggregation
 
