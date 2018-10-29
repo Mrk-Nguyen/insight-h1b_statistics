@@ -74,6 +74,8 @@ and easy implementations of:
 2. concurrency
 3. MapReduce
 
+Furthermore I've decided to ingest the data and only keep the most important data in objects for simplicity and efficient memory usage.
+
 ### Data exploration
 
 It is assumed that the input data will be a CSV file delimited by the semicolon character ";". The first issue I saw involved the delimiter
@@ -114,6 +116,7 @@ In summary, here is the general approach for the program:
 1. Load the CSV file and convert any semicolon characters that appear within double-quoted values.
 2. Split each line of data by the semicolon character and identify the key fields and field combinations.
 3. Filter for only certified visa applications.
+4. Add certified visa applications to objects that only hold the minimum amount of information that is needed to calculate the required metrics.
 4. Aggregate the filtered data using groupBy and mapping functions to calculate the Top 10 Occupations and Top 10 States metrics.
 5. Output the aggregated data to text files.
 
